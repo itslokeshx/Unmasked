@@ -55,27 +55,45 @@ UNMASKED maintains conversational context across multiple turns so follow-up que
 ```
 $ python main.py
 
-╭──────────────────────────────────╮
-│        U N M A S K E D          │
-│  Know the character. Unmask      │
-│         their mind.              │
-╰──────────────────────────────────╯
+  UNMASKED
+  Know the character. Unmask their mind.
 
-Who do you want to unmask: Johan Liebert
+ ─────────────────────────────────────────────
 
-  Scraped and indexed Wikipedia for Johan Liebert.
-  Type quit to end the session.
+  Enter a character name to begin.
+  Try: Batman  ·  Walter White  ·  Johan Liebert
 
-You: Who is Johan Liebert?
-UNMASKED  Johan is not a villain in the traditional sense...
+  character  Batman
 
-You: Why does he smile while manipulating people?
-UNMASKED  Because the smile is the only face that was never taken from him...
+  ✓  Batman · indexed
+  Ask anything about the character.  q to quit.
 
-You: Was he born evil?
-UNMASKED  No. That is the entire point of Monster...
+ ─────────────────────────────────────────────
 
-You: quit
+  >  Who is Batman?
+
+  UNMASKED
+
+  Batman is the alias of Bruce Wayne, a wealthy American playboy and
+  industrialist. He is a vigilante driven by witnessing his parents'
+  murder as a child — vowing to never kill, and to protect Gotham City
+  from the evil that took everything from him.
+
+ ─────────────────────────────────────────────
+
+  >  Why does he refuse to kill?
+
+  UNMASKED
+
+  Taking a life would make him indistinguishable from the criminals he
+  fights. The no-kill rule is the one line he refuses to cross — the
+  last thing separating his grief-driven mission from becoming the very
+  thing he hunts.
+
+ ─────────────────────────────────────────────
+
+  >  q
+
   Session ended.
 ```
 
