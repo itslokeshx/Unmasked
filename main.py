@@ -32,7 +32,11 @@ def main():
         f"  Loading knowledge for [bold white]{character}[/bold white]...",
         spinner="dots"
     ):
-        chain, session_id, ingested = build_chain(character)
+        try:
+            chain, session_id, ingested = build_chain(character)
+        except RuntimeError as e:
+            console.print(f"\n  [red]{e}[/red]\n")
+            sys.exit(1)
 
     if ingested:
         console.print(
