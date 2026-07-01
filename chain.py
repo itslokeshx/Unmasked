@@ -41,7 +41,7 @@ MAX_RETRIES = 3
 def load_from_wikipedia(character):
     for attempt in range(MAX_RETRIES):
         try:
-            loader = WikipediaLoader(query=character, load_max_docs=5)
+            loader = WikipediaLoader(query=character, load_max_docs=2)
             docs = loader.load()
             if docs:
                 return docs
@@ -85,7 +85,7 @@ def build_chain(character):
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
         temperature=0.1,
-        max_tokens=1024,
+        max_tokens=256,
         api_key=GROQ_API,
         request_timeout=30
     )
