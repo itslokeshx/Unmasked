@@ -12,22 +12,6 @@ It does not roleplay as the character. It helps you unmask them.
 
 ---
 
-## Table of Contents
-
-1. [What is UNMASKED](#what-is-unmasked)
-2. [Example Conversation](#example-conversation)
-3. [Architecture](#architecture)
-4. [Project Structure](#project-structure)
-5. [How It Works](#how-it-works)
-6. [Memory Model](#memory-model)
-7. [Tech Stack](#tech-stack)
-8. [LangChain Concepts Used](#langchain-concepts-used)
-9. [Setup](#setup)
-10. [Usage](#usage)
-11. [Current Status](#current-status)
-
----
-
 ## What is UNMASKED
 
 Every great character hides something beneath the surface.
