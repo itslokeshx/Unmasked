@@ -14,7 +14,7 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains import create_retrieval_chain, create_history_aware_retriever
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-from prompts import history_prompt, qa_prompt
+from prompts import history_prompt, make_qa_prompt
 from memory import get_session_history
 
 load_dotenv()
@@ -64,7 +64,8 @@ def build_chain(character):
         model="llama-3.1-8b-instant",
         temperature=0.1,
         max_tokens=1024,
-        api_key=GROQ_API
+        api_key=GROQ_API,
+        request_timeout=30
     )
 
     retriever = db.as_retriever(
@@ -73,7 +74,7 @@ def build_chain(character):
     )
 
     history_aware_retriever = create_history_aware_retriever(llm, retriever, history_prompt)
-    document_chain = create_stuff_documents_chain(llm, qa_prompt)
+    document_chain = create_stuff_documents_chain(llm, make_qa_prompt(character))
     retrieval_chain = create_retrieval_chain(history_aware_retriever, document_chain)
 
     session_id = str(uuid.uuid4())[:8]

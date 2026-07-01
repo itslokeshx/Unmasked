@@ -2,7 +2,7 @@ import sys
 import warnings
 import os
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore")
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 from rich.console import Console
@@ -86,11 +86,23 @@ def main():
 
         console.print()
 
-        with console.status("  [dim]thinking...[/dim]", spinner="dots"):
-            response = chain.invoke(
-                {"input": user_input},
-                config={"configurable": {"session_id": session_id}}
-            )
+        try:
+            with console.status("  [dim]thinking...[/dim]", spinner="dots"):
+                response = chain.invoke(
+                    {"input": user_input},
+                    config={"configurable": {"session_id": session_id}}
+                )
+        except KeyboardInterrupt:
+            console.print()
+            console.print("  [dim]Interrupted.[/dim]")
+            console.print()
+            console.rule(style="dim")
+            continue
+        except Exception as e:
+            console.print(f"  [red]Something went wrong: {e}[/red]")
+            console.print()
+            console.rule(style="dim")
+            continue
 
         console.print("  [dim]UNMASKED[/dim]")
         console.print()
