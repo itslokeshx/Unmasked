@@ -1,6 +1,9 @@
 import os
 import uuid
+import logging
 import chromadb
+
+logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
