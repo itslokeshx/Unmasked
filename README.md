@@ -12,7 +12,7 @@ A conversational RAG application for exploring the psychology of fictional chara
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-4B0082?style=flat-square)](https://www.trychroma.com/)
 [![License](https://img.shields.io/badge/license-MIT-000000?style=flat-square)](#license)
 
-[Overview](#overview) • [Demo](#demo) • [Architecture](#architecture) • [Setup](#setup) • [Usage](#usage) • [Tech Stack](#tech-stack)
+
 
 </div>
 
