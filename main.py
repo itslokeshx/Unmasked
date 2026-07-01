@@ -49,7 +49,7 @@ def main():
         spinner="dots"
     ):
         try:
-            chain, session_id, ingested = build_chain(character)
+            chain, session_id, ingested, keepalive = build_chain(character)
         except RuntimeError as e:
             console.print(f"  [red]{e}[/red]")
             console.print()
@@ -74,6 +74,7 @@ def main():
             console.print()
             console.print("  [dim]Session ended.[/dim]")
             console.print()
+            keepalive.stop()
             break
 
         if not user_input:
@@ -83,6 +84,7 @@ def main():
             console.print()
             console.print("  [dim]Session ended.[/dim]")
             console.print()
+            keepalive.stop()
             break
 
         console.print()

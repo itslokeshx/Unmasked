@@ -63,6 +63,27 @@ def _warm_up_llm(llm):
         pass
 
 
+class LLMKeepAlive:
+    """Pings the LLM every `interval` seconds to prevent Groq cold-start."""
+
+    def __init__(self, llm, interval=45):
+        self._llm = llm
+        self._interval = interval
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self):
+        while not self._stop.wait(self._interval):
+            try:
+                self._llm.invoke("hi")
+            except Exception:
+                pass
+
+    def stop(self):
+        self._stop.set()
+
+
 def build_chain(character):
     collection_name = character.lower().replace(" ", "_") + "_db"
 
@@ -121,6 +142,9 @@ def build_chain(character):
     # Wait for LLM warm-up to finish before building chains
     warmup_thread.join()
 
+    # Start keepalive so Groq stays warm even after Ctrl+C interruptions
+    keepalive = LLMKeepAlive(llm, interval=45)
+
     retriever = db.as_retriever(
         search_type="similarity",
         search_kwargs={"k": 3}
@@ -140,4 +164,4 @@ def build_chain(character):
         output_messages_key="answer"
     )
 
-    return conversation_chain, session_id, ingested
+    return conversation_chain, session_id, ingested, keepalive
