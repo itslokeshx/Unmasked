@@ -114,90 +114,45 @@ $ python main.py
 ## System Architecture & Flow
 
 UNMASKED is built on a modular, decoupled architecture consisting of four core components:
-1. **Interactive CLI Frontend** (`main.py`): Manages user input/output, formatting (via `rich`), interrupt handling, and session lifetime.
-2. **Parallelized Initialization Engine** (`chain.py`): Bootstraps resources concurrently to optimize loading times.
-3. **Ingestion & Retrieval Pipeline** (`chain.py` + `prompts.py`): Performs cached Wikipedia scraping, text chunking, HuggingFace local embedding generation, and Chroma DB semantic search.
-4. **LLM Orchestration & Keep-Alive Daemon** (`chain.py` + `memory.py`): Manages Llama 3.1 inference via Groq, coordinates conversational context rewriting, and keeps the LLM warm.
+1. **Interactive CLI Frontend** (`main.py`): Manages user input/output, formatting (via `rich`), and session lifetime.
+2. **Chain Orchestrator** (`chain.py`): Assembles the LangChain pipelines and handles cache checks.
+3. **Ingestion & Retrieval Pipeline** (`chain.py` + `prompts.py`): Performs Wikipedia scraping, text chunking, HuggingFace local embedding generation, and Chroma DB semantic search.
+4. **LLM & Memory Provider** (`chain.py` + `memory.py`): Manages Llama 3.1 inference via Groq, coordinates conversational context rewriting, and retains session chat history.
 
 ---
 
-### 1. Initialization & Bootstrapping Flow (Concurrently Spawned)
+### Core End-to-End RAG Lifecycle
 
-To hide the cold-start API latency of Groq's Llama 3.1 model and local HuggingFace embedding weights initialization, UNMASKED spins up parallel execution paths upon character entry.
+The flowchart below traces the complete lifecycle of a user session—from character loading/ingestion through conversational query resolution.
 
 ```mermaid
 flowchart TD
-    Start(["🚀 Start character load"]) --> SplitPath{"Parallel Threads"}
+    Start(["🚀 Start CLI Session"]) --> CharInput["👤 Character Selection"]
+    CharInput --> CacheCheck{"Vector Cache Check\n(Chroma Collection)"}
     
-    %% Main Thread Path
-    SplitPath -->|Main Thread| DBInit["🗄️ Database Sanitation\n(Clean up empty collections)"]
-    DBInit --> EmbedLoad["🔢 Load Embedding Model\n(all-MiniLM-L6-v2)"]
-    EmbedLoad --> CacheCheck{"Is character cached\nin ChromaDB?"}
+    %% Ingestion Branch
+    CacheCheck -->|No| WikiFetch["📖 Wikipedia Source Ingestion"]
+    WikiFetch --> Chunk["✂️ Recursive Character Text Splitting\n(Chunk Size: 1000, Overlap: 100)"]
+    Chunk --> EmbedDB["💾 Vector Embedding Generation\n(all-MiniLM-L6-v2) & Indexing"]
+    EmbedDB --> UserPrompt
     
-    CacheCheck -->|No| WikiFetch["📖 Scrape Wikipedia\n(with 3x retry & UA header)"]
-    WikiFetch --> Chunk["✂️ Recursive Splitter\n(1000 size, 100 overlap)"]
-    Chunk --> EmbedDB["💾 Embed & store in ChromaDB"]
-    EmbedDB --> JoinPoint
+    %% Cached Branch
+    CacheCheck -->|Yes| LoadDB["📂 Retrieve Persisted Vector Collection"]
+    LoadDB --> UserPrompt
     
-    CacheCheck -->|Yes| LoadDB["📂 Load existing collection\nfrom disk (Instant)"]
-    LoadDB --> JoinPoint
-
-    %% Background Warmup Path
-    SplitPath -->|Background Thread| LLMInit["🧠 Initialize ChatGroq\n(Llama 3.1 8B Instant)"]
-    LLMInit --> WarmupLLM["⚡ Warm-up Request\n(Send throwaway query 'hi')"]
-    WarmupLLM --> JoinPoint
-
-    %% Synchronize & Keepalive
-    JoinPoint{{"🔗 Thread Join\n(warmup_thread.join)"}} --> KeepAlive["🔄 Start LLMKeepAlive Daemon\n(Ping 'hi' every 45s)"]
-    KeepAlive --> BuildChains["⛓️ Assemble LangChain Pipelines"]
-    BuildChains --> Ready(["💬 Ready for User Prompt"])
+    %% Query/Chat Loop
+    UserPrompt["💬 User Query Submission"] --> HistoryLoad["🧠 Retrieve Session History"]
+    HistoryLoad --> HAR["🔄 Conversational Context Condensation\n(Rewrite Query with Chat History)"]
+    HAR --> Search["🔍 Vector Similarity Search\n(Retrieve Top-3 Context Documents)"]
+    Search --> StuffChain["📦 Context Stuffing\n(Context + History + System Prompt)"]
+    StuffChain --> Gen["⚡ LLM Inference\n(Groq Llama-3.1-8b-instant)"]
+    Gen --> SaveHistory["💾 Session Memory Update\n(Save Query & Response)"]
+    SaveHistory --> Output["✅ Render Grounded Analysis"]
+    Output --> UserPrompt
 
     style Start fill:#1C3C3C,stroke:#fff,color:#fff
-    style JoinPoint fill:#4B0082,stroke:#fff,color:#fff
-    style Ready fill:#2E7D32,stroke:#fff,color:#fff
-```
-
----
-
-### 2. Conversational Retrieval-Augmented Generation Flow (Per-Turn)
-
-Once initialized, every user turn triggers a stateful pipeline wrapped in `RunnableWithMessageHistory` to resolve context-aware references before querying the vector store.
-
-```mermaid
-flowchart LR
-    subgraph Input ["User Input & Context"]
-        A["💬 New User Query"]
-        B["💾 InMemory Session History"]
-    end
-
-    subgraph QueryRewriter ["1. History-Aware Retrieval (HAR)"]
-        C["🧠 Groq LLM\n(Prompt: history_prompt)"]
-        D["🔄 Standalone Query\n(Resolves pronouns & context)"]
-    end
-
-    subgraph VectorSearch ["2. Document Search & Ranking"]
-        E[("🗄️ Chroma DB")]
-        F["📌 Top-3 Context Chunks"]
-    end
-
-    subgraph AnswerGen ["3. Inference & Synthesis"]
-        G["📦 Stuff Documents Chain\n(Prompt: make_qa_prompt)"]
-        H["🧠 Groq LLM\n(Llama 3.1 8B)"]
-        I["📝 Synthesized Answer\n(Max 4 lines, direct, grounded)"]
-    end
-
-    A & B --> C
-    C --> D
-    D -->|Similarity Search| E
-    E --> F
-    F & B & A --> G
-    G --> H
-    H --> I
-    I -->|Save QA Exchange| B
-
-    style A fill:#1C3C3C,stroke:#fff,color:#fff
-    style E fill:#4B0082,stroke:#fff,color:#fff
-    style I fill:#2E7D32,stroke:#fff,color:#fff
+    style CacheCheck fill:#4B0082,stroke:#fff,color:#fff
+    style Output fill:#2E7D32,stroke:#fff,color:#fff
 ```
 
 **Why the rewrite step matters:**
@@ -206,14 +161,6 @@ flowchart LR
 |---|---|
 | `"What about his childhood?"` → searches `"childhood"` (too vague) | `"What about his childhood?"` → rewritten to `"What was Batman's childhood like?"` |
 | Retrieval misses relevant chunks | Retrieval is precise and grounded |
-
-#### Key Architecture Optimizations
-
-- **Parallel Bootstrapping**: Running Groq LLM warm-up in a separate background thread hides the network/cold-start latency of the first inference call behind the embedding generation process.
-- **Groq Keep-Alive Guard**: The background `LLMKeepAlive` daemon thread prevents Groq's server-less endpoints from shutting down due to inactivity, keeping subsequent query latency below ~300ms.
-- **Wikipedia Retrieval Retry Policy**: Robust network-resilient crawling with dynamic exponential sleep and custom user agent helps prevent rate-limiting or blocking.
-- **Database Sanitation**: Autodeletes corrupted/empty collections dynamically on boot to prevent query-time retrieval errors.
-- **Decoupled Architecture**: CLI/UI boundaries are strict. `main.py` owns CLI states, while `chain.py` encapsulates model/pipeline logic, facilitating a modular backend migration if needed.
 
 ---
 
