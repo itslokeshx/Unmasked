@@ -3,6 +3,7 @@ import uuid
 import time
 import warnings
 import logging
+import threading
 
 os.environ["TQDM_DISABLE"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -54,13 +55,48 @@ def load_from_wikipedia(character):
     )
 
 
+def _warm_up_llm(llm):
+    """Fire a tiny throwaway request to warm Groq's cold-start."""
+    try:
+        llm.invoke("hi")
+    except Exception:
+        pass
+
+
 def build_chain(character):
     collection_name = character.lower().replace(" ", "_") + "_db"
 
+    # Start LLM + warm-up in background thread immediately
+    llm = ChatGroq(
+        model="llama-3.1-8b-instant",
+        temperature=0.1,
+        max_tokens=512,
+        api_key=GROQ_API,
+        request_timeout=30
+    )
+    warmup_thread = threading.Thread(target=_warm_up_llm, args=(llm,), daemon=True)
+    warmup_thread.start()
+
+    # While LLM warms up, do embedding + DB work in parallel
     client = chromadb.PersistentClient(path="Chroma_DB")
+    all_collections = client.list_collections()
+    existing = {c.name.lower(): c.name for c in all_collections}
+
+    # Clean up empty duplicate collections created by casing bugs
+    for col in all_collections:
+        if col.count() == 0:
+            try:
+                client.delete_collection(col.name)
+            except Exception:
+                pass
+    # Refresh after cleanup
     existing = {c.name.lower(): c.name for c in client.list_collections()}
 
-    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True}
+    )
 
     if collection_name not in existing:
         docs = load_from_wikipedia(character)
@@ -82,13 +118,8 @@ def build_chain(character):
         )
         ingested = False
 
-    llm = ChatGroq(
-        model="llama-3.1-8b-instant",
-        temperature=0.1,
-        max_tokens=256,
-        api_key=GROQ_API,
-        request_timeout=30
-    )
+    # Wait for LLM warm-up to finish before building chains
+    warmup_thread.join()
 
     retriever = db.as_retriever(
         search_type="similarity",
