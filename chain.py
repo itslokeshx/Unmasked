@@ -26,13 +26,19 @@ def build_chain(character):
     collection_name = character.lower().replace(" ", "_") + "_db"
 
     client = chromadb.PersistentClient(path="Chroma_DB")
-    existing = [c.name for c in client.list_collections()]
+    existing = {c.name.lower(): c.name for c in client.list_collections()}
 
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     if collection_name not in existing:
-        loader = WikipediaLoader(query=character, load_max_docs=5)
-        docs = loader.load()
+        try:
+            loader = WikipediaLoader(query=character, load_max_docs=5)
+            docs = loader.load()
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not fetch Wikipedia data for '{character}'. "
+                f"Check your internet connection and try again. ({e})"
+            )
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = splitter.split_documents(docs)
         db = Chroma.from_documents(
@@ -43,6 +49,7 @@ def build_chain(character):
         )
         ingested = True
     else:
+        collection_name = existing[collection_name]
         db = Chroma(
             collection_name=collection_name,
             embedding_function=embedding,
