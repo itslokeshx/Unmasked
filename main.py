@@ -1,10 +1,4 @@
 import sys
-import warnings
-import os
-
-os.environ["PYTHONWARNINGS"] = "ignore"
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-warnings.simplefilter("ignore")
 
 from rich.console import Console
 from rich.markdown import Markdown

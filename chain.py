@@ -20,8 +20,8 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_classic.chains import create_retrieval_chain, create_history_aware_retriever
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain, create_history_aware_retriever
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from prompts import history_prompt, make_qa_prompt
@@ -31,10 +31,7 @@ wikipedia.set_user_agent("Unmasked/1.0 (Character Analysis Tool; Python)")
 
 load_dotenv()
 
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API")
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
-
-GROQ_API = os.environ["GROQ_API_KEY"]
+GROQ_API = os.getenv("GROQ_API")
 
 MAX_RETRIES = 3
 
