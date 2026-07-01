@@ -1,34 +1,34 @@
-# 🎭 UNMASKED
+# UNMASKED V1
 
-**Know the Character. Unmask Their Mind.**
+**Know the character. Unmask their mind.**
 
-UNMASKED is an AI-powered conversational RAG application that lets you chat with fictional characters through a psychological lens.
+UNMASKED is an AI-powered conversational RAG application that helps users explore and understand fictional characters through grounded, context-aware conversations.
 
-Instead of simply answering factual questions, UNMASKED retrieves grounded knowledge about a character and analyzes the motivations, beliefs, trauma, relationships, and decisions that shaped them.
+Unlike traditional AI chatbots that rely solely on a language model's internal knowledge, UNMASKED retrieves information from a dedicated knowledge base before generating every response. This keeps conversations factual, consistent, and closely tied to the character's established story rather than producing hallucinated or generic answers.
 
-It doesn't roleplay as the character.
-It helps you unmask them.
+The current version focuses on **character analysis**, enabling users to ask natural follow-up questions and progressively uncover a character's motivations, beliefs, personality, relationships, trauma, decision-making, and overall psychological development.
+
+It does not roleplay as the character. It helps you unmask them.
 
 ---
 
 ## Table of Contents
 
-1. [What is UNMASKED](#-what-is-unmasked)
-2. [Features](#-features)
-3. [Example Conversation](#-example-conversation)
-4. [Architecture](#-architecture)
-5. [Project Structure](#-project-structure)
-6. [How It Works — Data Flow](#-how-it-works--data-flow)
-7. [Memory Model](#-memory-model)
-8. [Tech Stack](#-tech-stack)
-9. [LangChain Concepts Used](#-langchain-concepts-used)
-10. [Setup](#-setup)
-11. [Usage](#-usage)
-12. [Current Status](#-current-status)
+1. [What is UNMASKED](#what-is-unmasked)
+2. [Example Conversation](#example-conversation)
+3. [Architecture](#architecture)
+4. [Project Structure](#project-structure)
+5. [How It Works](#how-it-works)
+6. [Memory Model](#memory-model)
+7. [Tech Stack](#tech-stack)
+8. [LangChain Concepts Used](#langchain-concepts-used)
+9. [Setup](#setup)
+10. [Usage](#usage)
+11. [Current Status](#current-status)
 
 ---
 
-## ✨ What is UNMASKED?
+## What is UNMASKED
 
 Every great character hides something beneath the surface.
 
@@ -38,202 +38,190 @@ Walter White isn't just a chemistry teacher.
 
 UNMASKED lets you have natural conversations about these characters while using Retrieval-Augmented Generation (RAG) to provide grounded, context-aware psychological analysis instead of hallucinated answers.
 
-Ask follow-up questions naturally, dig deeper into their choices, and uncover what truly drives them.
+For example, instead of simply answering *"Who is Batman?"*, users can continue the conversation with questions like:
+
+- Why does Batman refuse to kill?
+- What shaped his moral code?
+- Was he always this way?
+- How did the death of his parents influence his identity?
+- What separates Bruce Wayne from Batman?
+
+UNMASKED maintains conversational context across multiple turns so follow-up questions feel natural without repeatedly mentioning the character's name. A history-aware retrieval pipeline rewrites ambiguous questions into standalone queries before searching the vector database, ensuring accurate document retrieval and grounded responses.
 
 ---
 
-## 🚀 Features
-
-- 💬 Chat naturally with fictional characters, entirely from the terminal
-- 🧠 Psychological character analysis — motivations, trauma, defense mechanisms, philosophy
-- 📚 Wikipedia-powered Retrieval-Augmented Generation (RAG)
-- 🔍 Context-aware document retrieval via ChromaDB
-- 💭 Multi-turn conversations with session memory
-- 🔄 History-aware question rewriting for accurate follow-up retrieval
-- ⚡ Fast responses powered by Groq + Llama 3.1
-- 🗂️ Per-character vector store caching — no re-scraping on repeat runs
-
----
-
-## 🧠 Example Conversation
+## Example Conversation
 
 ```
 $ python main.py
 
-Who do you want to unmask today?: Johan Liebert
+╭──────────────────────────────────╮
+│        U N M A S K E D          │
+│  Know the character. Unmask      │
+│         their mind.              │
+╰──────────────────────────────────╯
 
-Scraping sources for Johan Liebert...
-Embedding and indexing...
-Ready. Ask anything.
+Who do you want to unmask: Johan Liebert
+
+  Scraped and indexed Wikipedia for Johan Liebert.
+  Type quit to end the session.
 
 You: Who is Johan Liebert?
-UNMASKED: Johan is not a villain in the traditional sense...
+UNMASKED  Johan is not a villain in the traditional sense...
 
 You: Why does he smile while manipulating people?
-UNMASKED: Because the smile is the only face that was never taken from him...
+UNMASKED  Because the smile is the only face that was never taken from him...
 
 You: Was he born evil?
-UNMASKED: No. That's the entire point of Monster...
-
-You: What belief drives all of his actions?
-UNMASKED: ...
+UNMASKED  No. That is the entire point of Monster...
 
 You: quit
-Session ended.
+  Session ended.
 ```
 
-Each question builds on the previous conversation without losing context — "he", "that", and "his actions" all resolve correctly because of session memory and history-aware retrieval.
+Each question builds on the previous conversation without losing context. "he", "that", and "his" all resolve correctly because of session memory and history-aware retrieval.
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```
-                        ┌──────────────────┐
-                        │   CLI (main.py)   │
-                        │  banner + loop    │
-                        └────────┬──────────┘
-                                 │
-                 ┌───────────────┼───────────────┐
-                 │               │               │
-                 ▼               ▼               ▼
-         ┌──────────────┐ ┌────────────┐ ┌───────────────┐
-         │  chain.py    │ │ memory.py  │ │  prompts.py   │
-         │  RAG pipeline│ │ session    │ │  UNMASKED     │
-         │  assembly    │ │ store dict │ │  persona      │
-         └──────┬───────┘ └─────┬──────┘ └───────┬───────┘
-                │                │                │
-                ▼                │                │
-       ┌─────────────────┐       │                │
-       │ Wikipedia Loader│       │                │
-       │ (data source)   │       │                │
-       └────────┬────────┘       │                │
-                │                │                │
-                ▼                │                │
-       ┌─────────────────┐       │                │
-       │ Text Splitter   │       │                │
-       │ (chunking)      │       │                │
-       └────────┬────────┘       │                │
-                │                │                │
-                ▼                │                │
-       ┌─────────────────┐       │                │
-       │ HuggingFace     │       │                │
-       │ Embeddings      │       │                │
-       └────────┬────────┘       │                │
-                │                │                │
-                ▼                │                │
-       ┌─────────────────┐       │                │
-       │ ChromaDB        │       │                │
-       │ (vector store,  │       │                │
-       │ cached per      │       │                │
-       │ character)      │       │                │
-       └────────┬────────┘       │                │
-                │                │                │
-                ▼                │                │
-       ┌──────────────────────┐  │                │
-       │ History-Aware        │◄─┘                │
-       │ Retriever            │                   │
-       └────────┬─────────────┘                   │
-                │                                  │
-                ▼                                  │
-       ┌──────────────────────┐                    │
-       │ Document Chain        │◄──────────────────┘
-       │ (context stuffing)    │
-       └────────┬─────────────┘
-                │
-                ▼
-       ┌──────────────────────┐
-       │ Retrieval Chain        │
-       └────────┬─────────────┘
-                │
-                ▼
-       ┌──────────────────────┐
-       │ Groq LLM                │
-       │ (Llama 3.1 8B Instant)  │
-       └────────┬─────────────┘
-                │
-                ▼
-       ┌──────────────────────┐
-       │ Grounded Psychological │
-       │ Response                │
-       └──────────────────────┘
+              User selects a character
+                      │
+                      ▼
+           Wikipedia Document Loader
+                      │
+                      ▼
+              Raw Character Article
+                      │
+                      ▼
+          Recursive Text Splitter
+                      │
+                      ▼
+             Small Text Chunks
+                      │
+                      ▼
+          HuggingFace Embeddings
+                      │
+                      ▼
+              Chroma Vector DB
+════════════════════════════════════════
+
+              User asks a question
+                      │
+                      ▼
+      RunnableWithMessageHistory
+                      │
+                      ▼
+        History Aware Retriever
+                      │
+                      ▼
+      Rewrite Follow-up Question
+                      │
+                      ▼
+          Chroma Similarity Search
+                      │
+                      ▼
+          Top Relevant Chunks
+                      │
+                      ▼
+        Stuff Document Chain
+                      │
+                      ▼
+        Prompt + Context + History
+                      │
+                      ▼
+             Groq Llama 3.1
+                      │
+                      ▼
+             Final AI Response
+                      │
+                      ▼
+          Save Conversation History
 ```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 unmasked/
-├── main.py            # CLI entrypoint — banner, character load, chat loop
-├── chain.py            # RAG pipeline: retriever, history-aware retriever,
-│                        # document chain, retrieval chain assembly
-├── prompts.py           # ChatPromptTemplate definitions — UNMASKED persona
-├── memory.py             # Session store — RunnableWithMessageHistory wiring
-├── chroma_db/             # Auto-created, persisted vector collections
-│                          # one collection per character (cached)
-├── .env                    # GROQ_API_KEY
+├── main.py           # CLI entry point — banner, character load, chat loop
+├── chain.py          # build_chain(character) — ingestion, pipeline assembly
+├── prompts.py        # ChatPromptTemplate definitions — UNMASKED persona
+├── memory.py         # Session store — InMemoryChatMessageHistory
+├── Chroma_DB/        # Persisted vector collections, one per character
+├── .env              # GROQ_API and HF_TOKEN
 └── requirements.txt
 ```
 
-**Design principle:** one file, one responsibility. `chain.py` never touches CLI logic. `main.py` never touches embedding logic. This separation is what makes a future FastAPI/React version a drop-in swap of only `main.py`.
+One file, one responsibility. `chain.py` never touches CLI logic. `main.py` never touches embedding logic. This separation makes a future API version a drop-in swap of only `main.py`.
 
 ---
 
-## ⚙️ How It Works — Data Flow
+## How It Works
+
+### Phase 1 — Knowledge Ingestion (once per character)
+
+1. User enters a character name.
+2. `build_chain` checks ChromaDB for an existing collection.
+3. If not found: Wikipedia is scraped, documents are split into chunks, embedded with HuggingFace, and stored in ChromaDB.
+4. If found: the existing collection is loaded directly — no re-scraping.
+
+### Phase 2 — Conversation
 
 ```
-1. User enters character name
+User types a question
         │
         ▼
-2. Check ChromaDB for existing collection
-        │
-   ┌────┴────┐
-   │ cached? │
-   └────┬────┘
-    yes │ no
-        │  └──► Scrape Wikipedia → Chunk (RecursiveCharacterTextSplitter)
-        │       → Embed (HuggingFace all-MiniLM-L6-v2) → Store in ChromaDB
+RunnableWithMessageHistory loads chat history for session
         │
         ▼
-3. Build retriever from collection
+History-Aware Retriever rewrites the question if it's a follow-up
         │
         ▼
-4. Assemble chain:
-   history_aware_retriever + document_chain → retrieval_chain
+ChromaDB similarity search → top 3 relevant chunks
         │
         ▼
-5. Wrap chain with RunnableWithMessageHistory (session_id generated)
+Chunks + chat history + system prompt passed to Groq Llama 3.1
         │
         ▼
-6. CLI loop begins — user asks questions
+Grounded response returned
         │
         ▼
-7. For each message:
-   a. Fetch chat_history for session_id
-   b. Rewrite follow-up question into standalone query (if needed)
-   c. Similarity search in ChromaDB → top-k relevant chunks
-   d. Stuff chunks into {context} of UNMASKED prompt
-   e. Send to Groq LLM
-   f. Save exchange back to session history
-   g. Print response
-        │
-        ▼
-8. User types "quit" → session ends, memory cleared
+Exchange saved back to session history
 ```
+
+**Why question rewriting?**
+
+Without it:
+
+```
+Who is Batman?
+→ What about his childhood?
+```
+
+The retriever searches "childhood" — too vague. With history-aware rewriting:
+
+```
+What about his childhood?
+→ What was Batman's childhood like?
+```
+
+Retrieval becomes accurate.
 
 ---
 
-## 🧩 Memory Model
+## Memory Model
 
-Session history is held **in-memory only**, for the lifetime of the running process.
+Session history is held in-memory for the lifetime of the running process.
 
 ```python
-store = {}  # session_id → ChatMessageHistory
+store = {}
 
-def get_session_history(session_id: str):
+def get_session_history(session_id):
     if session_id not in store:
-        store[session_id] = ChatMessageHistory()
+        store[session_id] = InMemoryChatMessageHistory()
     return store[session_id]
 ```
 
@@ -243,13 +231,11 @@ def get_session_history(session_id: str):
 | Typing `quit` | Cleared — process exits, dict is gone |
 | Running `python main.py` again | Fresh start, empty store |
 
-This is intentional for v1 — the goal is to prove `RunnableWithMessageHistory` mechanics cleanly. Persistent storage (SQLite/file-based) is a v2 concern, and swapping it in later only requires changing `memory.py` — the chain logic in `chain.py` stays untouched.
-
-**Separate from this:** the ChromaDB vector store persists across runs regardless — once a character is scraped and embedded, reloading them is instant on future runs.
+The ChromaDB vector store persists across runs regardless. Once a character is scraped and embedded, reloading is instant on future runs.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Tool | Purpose |
 |---|---|---|
@@ -258,85 +244,72 @@ This is intentional for v1 — the goal is to prove `RunnableWithMessageHistory`
 | LLM Provider | Groq | Fast inference |
 | Model | Llama 3.1 8B Instant | Response generation |
 | Vector Store | ChromaDB | Embedding storage + similarity search |
-| Embeddings | HuggingFace (`all-MiniLM-L6-v2`) | Local, free, 384-dim vectors |
+| Embeddings | HuggingFace `all-MiniLM-L6-v2` | Local, free, 384-dim vectors |
 | Data Source | Wikipedia Loader | Character source material |
-| Memory | In-memory dict + `ChatMessageHistory` | Session-scoped conversation memory |
+| Memory | In-memory dict + InMemoryChatMessageHistory | Session-scoped conversation memory |
+| CLI | Rich | Terminal UI |
 
 ---
 
-## 🔗 LangChain Concepts Used
+## LangChain Concepts Used
 
 | Concept | Role in UNMASKED |
 |---|---|
-| `ChatPromptTemplate` | Defines the UNMASKED persona and structures system/history/human messages |
-| `MessagesPlaceholder` | Injects variable-length chat history into the prompt cleanly |
+| `ChatPromptTemplate` | Defines the UNMASKED persona and structures system / history / human messages |
+| `MessagesPlaceholder` | Injects variable-length chat history into the prompt |
 | `create_stuff_documents_chain` | Stuffs retrieved chunks into `{context}` before generation |
 | `create_retrieval_chain` | Combines retriever + document chain into one callable pipeline |
-| `create_history_aware_retriever` | Rewrites follow-up questions ("why does he smile?") into standalone queries before retrieval |
+| `create_history_aware_retriever` | Rewrites follow-up questions into standalone queries before retrieval |
 | `RunnableWithMessageHistory` | Adds multi-turn session memory to an otherwise stateless chain |
 
 ---
 
-## 🔧 Setup
+## Setup
 
 ```bash
-# clone / navigate to project
+git clone <repo>
 cd unmasked
 
-# install dependencies
+python -m venv venv
+source venv/bin/activate
+
 pip install -r requirements.txt
-
-# add your Groq API key
-echo "GROQ_API_KEY=your_key_here" > .env
 ```
 
-**requirements.txt**
+Add your API keys to `.env`:
+
 ```
-langchain
-langchain-groq
-langchain-huggingface
-langchain-chroma
-langchain-community
-chromadb
-python-dotenv
-wikipedia
+GROQ_API=your_groq_key_here
+HF_TOKEN=your_huggingface_token_here
 ```
 
 ---
 
-## ▶️ Usage
+## Usage
 
 ```bash
 python main.py
 ```
 
-```
-Who do you want to unmask today?: Batman
-
-Scraping sources for Batman...
-Embedding and indexing...
-Ready. Ask anything.
-
-You: Why does Batman refuse to kill?
-UNMASKED: ...
-
-You: quit
-Session ended.
-```
+Enter any fictional character at the prompt. UNMASKED will scrape and index Wikipedia on first load, then cache it for future runs.
 
 **Commands during chat:**
-- `quit` / `exit` — end the session
-- Any character name at startup — loads fresh or from cache automatically
+
+| Input | Action |
+|---|---|
+| Any question | Grounded psychological analysis |
+| `quit` / `exit` / `q` | End the session |
+| `Ctrl+C` | Exit immediately |
 
 ---
 
-## 📌 Current Status
+## Current Status
 
-UNMASKED v1 is a **CLI-only, Character Mode application.**
+UNMASKED V1 is a CLI-only, single-character-per-session application.
 
-It focuses entirely on deep, grounded psychological conversations about a single fictional character per session, with full multi-turn memory and history-aware retrieval.
+It focuses entirely on deep, grounded psychological conversations with full multi-turn memory and history-aware retrieval. There is no persistent storage, no web UI, and no multi-character sessions in this version.
 
-There is no persistent storage, no UI, and no self-reflection ("Mirror Mode") in this version — the goal of v1 is to master and demonstrate the core LangChain conversational RAG stack cleanly, end to end.
+The goal of V1 is to master and demonstrate the core LangChain conversational RAG stack cleanly, end to end.
 
 ---
 

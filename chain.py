@@ -1,15 +1,18 @@
 import os
+import uuid
+import chromadb
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_core.output_parsers import StrOutputParser
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import WikipediaLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain, create_history_aware_retriever
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-from prompts import rag_prompt, history_prompt, qa_prompt
-from memory import get_session_history, session_id
+from prompts import history_prompt, qa_prompt
+from memory import get_session_history
 
 load_dotenv()
 
@@ -18,46 +21,59 @@ os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 GROQ_API = os.environ["GROQ_API_KEY"]
 
-llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.1, max_tokens=1024, api_key=GROQ_API)
 
-parser = StrOutputParser()
+def build_chain(character):
+    collection_name = character.lower().replace(" ", "_") + "_db"
 
-chain = llm | parser
+    client = chromadb.PersistentClient(path="Chroma_DB")
+    existing = [c.name for c in client.list_collections()]
 
-hg_embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-Vector_DB = Chroma(
-    collection_name="Batman_DB",
-    embedding_function=hg_embedding,
-    persist_directory="Chroma_DB"
-)
+    if collection_name not in existing:
+        loader = WikipediaLoader(query=character, load_max_docs=5)
+        docs = loader.load()
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        chunks = splitter.split_documents(docs)
+        db = Chroma.from_documents(
+            documents=chunks,
+            embedding=embedding,
+            collection_name=collection_name,
+            persist_directory="Chroma_DB"
+        )
+        ingested = True
+    else:
+        db = Chroma(
+            collection_name=collection_name,
+            embedding_function=embedding,
+            persist_directory="Chroma_DB"
+        )
+        ingested = False
 
-retriever = Vector_DB.as_retriever(
-    search_type="similarity",
-    search_kwargs={"k": 3}
-)
+    llm = ChatGroq(
+        model="llama-3.1-8b-instant",
+        temperature=0.1,
+        max_tokens=1024,
+        api_key=GROQ_API
+    )
 
-document_chain = create_stuff_documents_chain(
-    llm,
-    rag_prompt
-)
+    retriever = db.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": 3}
+    )
 
-retrieval_chain = create_retrieval_chain(
-    retriever,
-    document_chain
-)
+    history_aware_retriever = create_history_aware_retriever(llm, retriever, history_prompt)
+    document_chain = create_stuff_documents_chain(llm, qa_prompt)
+    retrieval_chain = create_retrieval_chain(history_aware_retriever, document_chain)
 
-history_aware_retriever = create_history_aware_retriever(
-    llm, retriever, history_prompt
-)
+    session_id = str(uuid.uuid4())[:8]
 
-convo_document_chain = create_stuff_documents_chain(llm, qa_prompt)
-convo_retrieval_chain = create_retrieval_chain(history_aware_retriever, convo_document_chain)
+    conversation_chain = RunnableWithMessageHistory(
+        retrieval_chain,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="chat_history",
+        output_messages_key="answer"
+    )
 
-conversation_chain = RunnableWithMessageHistory(
-    convo_retrieval_chain,
-    get_session_history,
-    input_messages_key="input",
-    history_messages_key="chat_history",
-    output_messages_key="answer"
-)
+    return conversation_chain, session_id, ingested
