@@ -2,10 +2,9 @@
 
 # 🎭 UNMASKED
 
-**Know the character. Unmask their mind.**
+**AI-powered conversational RAG for analyzing fictional characters through grounded psychological conversations.**
 
-A conversational RAG engine for exploring the psychology of fictional characters —
-grounded in retrieved fact, never hallucinated, never in-character roleplay.
+*Know the character. Unmask their mind.*
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-RAG_Pipeline-1C3C3C?style=flat-square)
@@ -67,6 +66,25 @@ UNMASKED is built on four decoupled components, each with exactly one job:
 |---|---|
 | "What about his childhood?" → searches literally for *"his childhood"* | Rewritten to *"What was Batman's childhood like?"* before searching |
 | Retrieval is vague, often misses the right chunks | Retrieval is precise and grounded every time |
+
+### RAG Pipeline Configurations
+
+| Stage | Component / Model | Configuration / Value |
+|---|---|---|
+| **Data Ingestion** | WikipediaLoader | Fetches up to 2 Wikipedia articles per character with custom User-Agent |
+| **Text Chunking** | RecursiveCharacterTextSplitter | Chunk size: `1000` characters, chunk overlap: `100` characters |
+| **Embeddings** | HuggingFace `all-MiniLM-L6-v2` | Local execution (CPU), 384-dimensional vectors, L2 normalized |
+| **Vector Store** | ChromaDB (PersistentClient) | Dynamic database cache, segregated collection per character |
+| **Retrieval** | Similarity Search | Top-3 semantic chunks retrieved ($k=3$) |
+| **LLM Provider** | ChatGroq (`llama-3.1-8b-instant`) | `temperature=0.1`, `max_tokens=512`, timeout: 30s |
+
+### Design Decisions & Rationales
+
+* **Why Wikipedia?** Wikipedia provides a structured, factual, and neutral source of narrative summaries. It avoids noisy, colloquial forum data, ensuring that the character's psychological profile starts with high-quality source text. The ingestion pipeline is source-agnostic, meaning you can easily swap this loader for a custom PDF, fandom wiki, or database loader.
+* **Why ChromaDB?** A local, embedded database avoids the overhead of managing a network-based vector database service (like Pinecone or Milvus) and makes local setup instant and serverless.
+* **Why per-character vector collections?** Instead of storing all characters in one large namespace, UNMASKED isolates each character into a dedicated ChromaDB collection (e.g., `batman_db`). This guarantees zero context leakage across different character sessions, makes database cleaning simple, and speeds up queries.
+* **Why history-aware retrieval?** User inputs in a chat are conversational and use anaphora (e.g., "why does he refuse to kill?"). If queried directly against the vector database, these terms retrieve irrelevant records. History-aware retrieval uses the LLM to rewrite ambiguous user queries into standalone, search-optimized queries before querying ChromaDB.
+* **Why session-scoped memory?** Ephemeral memory (`InMemoryChatMessageHistory`) ensures that chat context doesn't drift between character switches or across separate application runs, while keeping the persistent vector store clean and specialized.
 
 <br>
 
@@ -182,9 +200,19 @@ Enter any fictional character at the prompt. UNMASKED scrapes and indexes Wikipe
 
 <br>
 
-## Status
+## Current Limitations & Roadmap
 
-UNMASKED is currently a **CLI-first, single-mode application** — deep psychological analysis of one character at a time, with full multi-turn memory and history-aware retrieval. No persistent storage, no UI, no self-reflection mode yet: the current focus is mastering and demonstrating the core LangChain conversational RAG stack end to end, cleanly.
+### Limitations
+* **Single-Source Ingestion:** Relies solely on Wikipedia, which may omit deep comic-book issues or fan theories.
+* **Volatile Session Memory:** Chat history is stored in-memory and cleared on application exit or character switch.
+* **Single-Character Scope:** Multi-character debates or joint analyses are not supported in the current pipeline.
+* **No Reranking Step:** Semantic search retrieves directly from vector distance, without cross-encoder reranking.
+
+### Roadmap
+1. **Multi-Source Ingestion:** Integrate Fandom Wikia, custom books, and PDF character guides.
+2. **Persistent Chat Sessions:** Implement SQLite or file-based memory to save and resume character chats.
+3. **Cross-Character Analysis:** Allow loading two characters in a dual-retriever pipeline for comparative psychology.
+4. **Context Reranking:** Integrate a local or API-based cross-encoder (e.g., Cohere or HuggingFace) to improve retrieval precision.
 
 <br>
 
