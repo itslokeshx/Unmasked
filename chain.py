@@ -3,7 +3,6 @@ import uuid
 import time
 import warnings
 import logging
-import threading
 
 os.environ["TQDM_DISABLE"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -52,39 +51,11 @@ def load_from_wikipedia(character):
     )
 
 
-def _warm_up_llm(llm):
-    """Fire a tiny throwaway request to warm Groq's cold-start."""
-    try:
-        llm.invoke("hi")
-    except Exception:
-        pass
-
-
-class LLMKeepAlive:
-    """Pings the LLM every `interval` seconds to prevent Groq cold-start."""
-
-    def __init__(self, llm, interval=45):
-        self._llm = llm
-        self._interval = interval
-        self._stop = threading.Event()
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
-
-    def _run(self):
-        while not self._stop.wait(self._interval):
-            try:
-                self._llm.invoke("hi")
-            except Exception:
-                pass
-
-    def stop(self):
-        self._stop.set()
 
 
 def build_chain(character):
     collection_name = character.lower().replace(" ", "_") + "_db"
 
-    # Start LLM + warm-up in background thread immediately
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
         temperature=0.1,
@@ -92,22 +63,16 @@ def build_chain(character):
         api_key=GROQ_API,
         request_timeout=30
     )
-    warmup_thread = threading.Thread(target=_warm_up_llm, args=(llm,), daemon=True)
-    warmup_thread.start()
-
-    # While LLM warms up, do embedding + DB work in parallel
     client = chromadb.PersistentClient(path="Chroma_DB")
     all_collections = client.list_collections()
     existing = {c.name.lower(): c.name for c in all_collections}
 
-    # Clean up empty duplicate collections created by casing bugs
     for col in all_collections:
         if col.count() == 0:
             try:
                 client.delete_collection(col.name)
             except Exception:
                 pass
-    # Refresh after cleanup
     existing = {c.name.lower(): c.name for c in client.list_collections()}
 
     embedding = HuggingFaceEmbeddings(
@@ -136,11 +101,7 @@ def build_chain(character):
         )
         ingested = False
 
-    # Wait for LLM warm-up to finish before building chains
-    warmup_thread.join()
 
-    # Start keepalive so Groq stays warm even after Ctrl+C interruptions
-    keepalive = LLMKeepAlive(llm, interval=45)
 
     retriever = db.as_retriever(
         search_type="similarity",
@@ -161,4 +122,4 @@ def build_chain(character):
         output_messages_key="answer"
     )
 
-    return conversation_chain, session_id, ingested, keepalive
+    return conversation_chain, session_id, ingested
