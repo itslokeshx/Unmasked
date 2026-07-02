@@ -42,48 +42,7 @@ A history-aware retrieval pipeline rewrites ambiguous follow-ups — "him", "tha
 
 ## Demo
 
-```
-$ python main.py
-
- ██╗   ██╗███╗   ██╗███╗   ███╗ █████╗ ███████╗██╗  ██╗███████╗██████╗
- ██║   ██║████╗  ██║████╗ ████║██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗
- ██║   ██║██╔██╗ ██║██╔████╔██║███████║███████╗█████╔╝ █████╗  ██║  ██║
- ██║   ██║██║╚██╗██║██║╚██╔╝██║██╔══██║╚════██║██╔═██╗ ██╔══╝  ██║  ██║
- ╚██████╔╝██║ ╚████║██║ ╚═╝ ██║██║  ██║███████║██║  ██╗███████╗██████╔╝
-  ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═════╝
-
-        Know the character. Unmask their mind.
- ─────────────────────────────────────────────────────
-
-  Enter a character name to begin.
-  Try: Batman · Walter White · Johan Liebert
-
-  character  ›  Batman
-
-  ●  Batman · freshly indexed
-
-  Ask anything.  help for commands ·  q to quit.
- ─────────────────────────────────────────────────────
-
-  ›  Who is Batman?
-
-  ◆ UNMASKED
-  Batman is the alias of Bruce Wayne — a vigilante driven by witnessing
-  his parents' murder as a child, vowing to protect Gotham from the
-  violence that took everything from him.
- ─────────────────────────────────────────────────────
-
-  ›  Why does he refuse to kill?
-
-  ◆ UNMASKED
-  Taking a life would make him indistinguishable from the criminals he
-  fights. The no-kill rule is the last line separating his grief-driven
-  mission from becoming the very thing he hunts.
- ─────────────────────────────────────────────────────
-
-  ›  q
-  Session ended.
-```
+<img src="Docs/Demo.png" alt="UNMASKED CLI Demo" width="100%">
 
 "He", "that", and "his" all resolve correctly across turns — no context lost, no name repetition needed.
 
@@ -91,7 +50,7 @@ $ python main.py
 
 ## Architecture
 
-<img src="docs/architecture.svg" alt="UNMASKED RAG pipeline architecture" width="100%">
+<img src="Docs/architecture.svg" alt="UNMASKED RAG pipeline architecture" width="100%">
 
 UNMASKED is built on four decoupled components, each with exactly one job:
 
@@ -119,7 +78,8 @@ unmasked/
 ├── chain.py           # build_chain(character) — ingestion, pipeline assembly
 ├── prompts.py          # ChatPromptTemplate definitions — UNMASKED persona
 ├── memory.py           # Session store — InMemoryChatMessageHistory
-├── docs/
+├── Docs/
+│   ├── Demo.png
 │   └── architecture.svg
 ├── Chroma_DB/            # Persisted vector collections, one per character
 ├── .env                    # GROQ_API and HF_TOKEN
@@ -233,7 +193,5 @@ UNMASKED is currently a **CLI-first, single-mode application** — deep psycholo
 <div align="center">
 
 *Every character wears a mask. UNMASKED helps you understand what's underneath.*
-
-**Built by [Loki](https://github.com/itslokeshx)** · MIT Licensed
 
 </div>
