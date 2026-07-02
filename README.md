@@ -163,22 +163,88 @@ The ChromaDB vector store is the exception — it persists across runs regardles
 
 ## Setup
 
+Follow these steps to set up UNMASKED locally on your machine.
+
+### 📋 Prerequisites
+
+Before you start, make sure you have the following installed:
+* **Python 3.10 or higher**: Check your version using `python --version` (or `python3 --version`).
+* **Git**: To clone the repository.
+* **Groq API Key**: Needed to run inference via Llama 3.1. Get one for free at the [Groq Console](https://console.groq.com/).
+* **Hugging Face Account** (Optional): Useful if you want to use customized models or avoid rate limits. Get a token at [Hugging Face Settings](https://huggingface.co/settings/tokens).
+
+---
+
+### 🚀 Step-by-Step Installation
+
+#### 1. Clone the Repository
+Clone the codebase and navigate to the project root directory:
 ```bash
 git clone https://github.com/itslokeshx/Unmasked.git
-cd unmasked
+cd Unmasked
+```
 
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+#### 2. Set Up a Virtual Environment
+We recommend using a virtual environment to keep your global Python environment clean and avoid dependency conflicts:
+* **macOS / Linux**:
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+* **Windows (Command Prompt)**:
+  ```cmd
+  python -m venv venv
+  venv\Scripts\activate
+  ```
+* **Windows (PowerShell)**:
+  ```powershell
+  python -m venv venv
+  .\venv\Scripts\Activate.ps1
+  ```
 
+#### 3. Install Dependencies
+Upgrade `pip` first, then install the required Python packages:
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
+> **Note:** Installing `chromadb` and `sentence-transformers` may compile native components or download package dependencies. Please ensure you have basic C++ build tools installed on your system if compilation errors occur.
 
-Add your API keys to a `.env` file:
+#### 4. Configure Environment Variables
+Copy the template `.env.example` file to create your `.env` configuration:
+```bash
+cp .env.example .env
+```
+Open the newly created `.env` file and replace the placeholders with your actual keys:
+```env
+GROQ_API=gsk_your_groq_api_key_here
+HF_TOKEN=hf_your_huggingface_token_here
+```
 
-```
-GROQ_API=your_groq_key_here
-HF_TOKEN=your_huggingface_token_here
-```
+---
+
+### 📦 First-Run & Caching Behavior
+
+When you start the application for the first time:
+1. **Model Download:** The application will download the Hugging Face `all-MiniLM-L6-v2` embedding model (approximately 90MB) to compute vectors locally on your CPU. This happens automatically and only once.
+2. **Scraping & Indexing:** When you enter a character (e.g., *Batman*), UNMASKED queries Wikipedia, splits the pages into chunks, generates embeddings, and saves the vectors in the local `/Chroma_DB` directory.
+3. **Subsequent Runs:** For any character that has been indexed before, UNMASKED reads directly from `/Chroma_DB`, avoiding Wikipedia scrapes and redundant embedding generation. Startups for cached characters are instant.
+
+---
+
+### 🛠️ Troubleshooting
+
+* **SSL/TLS Certificate Errors (macOS):**
+  If Python fails to download the embedding model or fetch Wikipedia due to SSL errors, run the certificate installation script shipped with Python on macOS:
+  ```bash
+  /Applications/Python\ 3.xx/Install\ Certificates.command
+  ```
+* **ChromaDB Installation Fails:**
+  ChromaDB requires C++ compilation on some platforms. 
+  - **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and select "Desktop development with C++".
+  - **Linux (Ubuntu/Debian):** Run `sudo apt-get install build-essential python3-dev`.
+* **Groq Authentication Errors:**
+  Ensure the `GROQ_API` value in `.env` is exact, has no leading/trailing quotes, and begins with `gsk_`.
 
 <br>
 
