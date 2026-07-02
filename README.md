@@ -221,6 +221,12 @@ GROQ_API=gsk_your_groq_api_key_here
 HF_TOKEN=hf_your_huggingface_token_here
 ```
 
+#### 5. Run the Application
+Start the interactive CLI application:
+```bash
+python main.py
+```
+
 ---
 
 ### 📦 First-Run & Caching Behavior
