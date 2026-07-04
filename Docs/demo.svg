@@ -1,0 +1,114 @@
+<svg viewBox="0 0 1000 820" xmlns="http://www.w3.org/2000/svg" font-family="Consolas, 'SF Mono', Menlo, monospace">
+  <title>UNMASKED — animated CLI demo</title>
+  <desc>Looping terminal demo: a character name is typed, then two example questions are typed one at a time with responses fading in after each.</desc>
+
+  <rect x="0" y="0" width="1000" height="820" fill="#050506"/>
+  <rect x="20" y="20" width="960" height="780" rx="16" fill="#0d0d0f" stroke="#26262b" stroke-width="1.2"/>
+
+  <!-- title bar -->
+  <circle cx="48" cy="48" r="7" fill="#ff5f57"/>
+  <circle cx="68" cy="48" r="7" fill="#febc2e"/>
+  <circle cx="88" cy="48" r="7" fill="#28c840"/>
+  <text x="500" y="53" text-anchor="middle" fill="#d8d8da" font-size="14" font-weight="500">Unmasked</text>
+  <rect x="866" y="36" width="100" height="26" rx="13" fill="#17171a" stroke="#34343a" stroke-width="1"/>
+  <circle cx="884" cy="49" r="5" fill="#b967ff"/>
+  <text x="896" y="53" fill="#c9c9cc" font-size="11">python3</text>
+  <line x1="20" y1="76" x2="980" y2="76" stroke="#232326"/>
+
+  <!-- banner -->
+  <text x="503" y="183" text-anchor="middle" fill="#5c2f86" font-size="64" font-weight="800">UNMASKED</text>
+  <text x="500" y="180" text-anchor="middle" fill="#c98bff" font-size="64" font-weight="800" stroke="#8b3fd6" stroke-width="1.5">
+    UNMASKED
+    <animate attributeName="opacity" values="0.9;1;0.9" dur="3s" repeatCount="indefinite"/>
+  </text>
+  <text x="500" y="212" text-anchor="middle" fill="#8a8a90" font-size="14">Know the character. Unmask their mind.</text>
+  <line x1="20" y1="232" x2="980" y2="232" stroke="#232326"/>
+
+  <!-- instructions -->
+  <text x="45" y="266" fill="#8a8a90" font-size="14">Enter a character name to begin.</text>
+  <text x="45" y="288" fill="#8a8a90" font-size="14">Try: Batman &#183; Walter White &#183; Johan Liebert</text>
+
+  <!-- character row -->
+  <text x="45" y="316" fill="#f0f0f2" font-size="15" font-weight="700">character</text>
+  <text x="140" y="316" fill="#f0f0f2" font-size="15" font-weight="700">&#8250;</text>
+  <clipPath id="clipChar">
+    <rect x="165" y="300" height="22">
+      <animate attributeName="width" dur="13s" repeatCount="indefinite"
+        keyTimes="0;0.04615;0.88462;0.92308;1" values="0;60;60;0;0"/>
+    </rect>
+  </clipPath>
+  <text x="165" y="316" fill="#c98bff" font-size="15" font-weight="700" clip-path="url(#clipChar)">Batman</text>
+  <line x1="20" y1="338" x2="980" y2="338" stroke="#232326"/>
+
+  <!-- shared blinking type-cursor -->
+  <rect width="8" height="20" fill="#c98bff">
+    <animate attributeName="x" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.04615;0.07692;0.15385;0.38462;0.48462;1"
+      values="165;225;65;245;65;299;165"/>
+    <animate attributeName="y" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.04615;0.07692;0.15385;0.38462;0.48462;1"
+      values="302;302;358;358;482;482;302"/>
+    <animate attributeName="opacity" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.04615;0.04692;0.07692;0.15385;0.15462;0.38462;0.48462;0.48538;1"
+      values="1;1;0;1;1;0;1;1;0;0"/>
+  </rect>
+
+  <!-- query 1 -->
+  <text x="45" y="372" fill="#b967ff" font-size="15" font-weight="700">
+    &#8250;
+    <animate attributeName="opacity" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.07692;0.07700;0.88462;0.92308;1" values="0;0;1;1;0;0"/>
+  </text>
+  <clipPath id="clipQ1">
+    <rect x="65" y="358" height="22">
+      <animate attributeName="width" dur="13s" repeatCount="indefinite"
+        keyTimes="0;0.07692;0.15385;0.88462;0.92308;1" values="0;0;180;180;0;0"/>
+    </rect>
+  </clipPath>
+  <text x="65" y="372" fill="#e8e8ea" font-size="15" clip-path="url(#clipQ1)">what drives batman?</text>
+
+  <!-- response 1 -->
+  <g>
+    <animate attributeName="opacity" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.17692;0.20769;0.88462;0.92308;1" values="0;0;1;1;0;0"/>
+    <text x="45" y="397" fill="#c98bff" font-size="13" font-weight="700">&#9670; UNMASKED</text>
+    <text x="45" y="420" fill="#d0d0d3" font-size="13">Batman's drive stems from witnessing his parents' murder as a child &#8212;</text>
+    <text x="45" y="440" fill="#d0d0d3" font-size="13">a trauma that hard-wires a need for justice, tempered by a strict moral code.</text>
+  </g>
+  <line x1="20" y1="462" x2="980" y2="462" stroke="#232326"/>
+
+  <!-- query 2 -->
+  <text x="45" y="496" fill="#b967ff" font-size="15" font-weight="700">
+    &#8250;
+    <animate attributeName="opacity" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.38462;0.38470;0.88462;0.92308;1" values="0;0;1;1;0;0"/>
+  </text>
+  <clipPath id="clipQ2">
+    <rect x="65" y="482" height="22">
+      <animate attributeName="width" dur="13s" repeatCount="indefinite"
+        keyTimes="0;0.38462;0.48462;0.88462;0.92308;1" values="0;0;234;234;0;0"/>
+    </rect>
+  </clipPath>
+  <text x="65" y="496" fill="#e8e8ea" font-size="15" clip-path="url(#clipQ2)">list the trauma's he had!</text>
+
+  <!-- response 2 -->
+  <g>
+    <animate attributeName="opacity" dur="13s" repeatCount="indefinite"
+      keyTimes="0;0.50769;0.53846;0.88462;0.92308;1" values="0;0;1;1;0;0"/>
+    <text x="45" y="521" fill="#c98bff" font-size="13" font-weight="700">&#9670; UNMASKED</text>
+    <text x="45" y="546" fill="#5ec2f0" font-size="13">1<tspan fill="#d0d0d3" dx="8">Witnessed his parents' murder at a young age.</tspan></text>
+    <text x="45" y="568" fill="#5ec2f0" font-size="13">2<tspan fill="#d0d0d3" dx="8">Was left alone after his mother's death.</tspan></text>
+    <text x="45" y="590" fill="#5ec2f0" font-size="13">3<tspan fill="#d0d0d3" dx="8">Developed a fear of bats after falling into a well.</tspan></text>
+    <text x="45" y="612" fill="#5ec2f0" font-size="13">4<tspan fill="#d0d0d3" dx="8">Carried lasting feelings of abandonment.</tspan></text>
+    <text x="45" y="634" fill="#5ec2f0" font-size="13">5<tspan fill="#d0d0d3" dx="8">Never avenged them &#8212; Joe Chill was killed first.</tspan></text>
+  </g>
+  <line x1="20" y1="660" x2="980" y2="660" stroke="#232326"/>
+
+  <!-- footer -->
+  <text x="45" y="690" font-size="14">
+    <tspan fill="#8a8a90">Ask anything.  </tspan><tspan fill="#5ec2f0" font-weight="700">help</tspan><tspan fill="#8a8a90"> for commands  &#183;  </tspan><tspan fill="#5ec2f0" font-weight="700">q</tspan><tspan fill="#8a8a90"> to quit.</tspan>
+  </text>
+  <rect x="45" y="705" width="8" height="16" fill="#c98bff">
+    <animate attributeName="opacity" dur="1s" repeatCount="indefinite" keyTimes="0;0.5;1" values="0;1;0"/>
+  </rect>
+</svg>

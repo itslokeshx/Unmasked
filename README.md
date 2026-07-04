@@ -41,7 +41,7 @@ A history-aware retrieval pipeline rewrites ambiguous follow-ups — "him", "tha
 
 ## Demo
 
-<img src="Docs/Demo.svg" alt="UNMASKED CLI Demo" width="100%">
+<img src="Docs/demo.svg" alt="UNMASKED CLI Demo" width="100%">
 
 "He", "that", and "his" all resolve correctly across turns — no context lost, no name repetition needed.
 
