@@ -1,0 +1,253 @@
+<svg viewBox="0 0 920 680" xmlns="http://www.w3.org/2000/svg" font-family="'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace">
+  <defs>
+    <!-- Terminal window shadow -->
+    <filter id="windowShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Blinking cursor -->
+    <rect id="cursor" width="8" height="15" fill="#b967ff">
+      <animate attributeName="opacity" values="1;1;0;0" dur="1s" repeatCount="indefinite" keyTimes="0;0.5;0.5;1"/>
+    </rect>
+
+    <!-- Glow for accent text -->
+    <filter id="textGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feFlood flood-color="#b967ff" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes typeChar {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Character typing - each letter fades in sequentially */
+    .type-char { opacity: 0; }
+
+    /* Phase groups - staggered reveal of conversation sections */
+    .phase-banner  { opacity: 0; animation: fadeIn 0.8s ease-out 0.3s forwards; }
+    .phase-prompt  { opacity: 0; animation: fadeIn 0.5s ease-out 1.2s forwards; }
+    .phase-input1  { opacity: 0; animation: fadeIn 0.4s ease-out 2.0s forwards; }
+
+    /* Q1 typing animation: "what drives batman?" — starts at 2.5s */
+    .q1-c1  { animation: typeChar 0.04s 2.5s forwards; }
+    .q1-c2  { animation: typeChar 0.04s 2.55s forwards; }
+    .q1-c3  { animation: typeChar 0.04s 2.60s forwards; }
+    .q1-c4  { animation: typeChar 0.04s 2.65s forwards; }
+    .q1-c5  { animation: typeChar 0.04s 2.70s forwards; }
+    .q1-c6  { animation: typeChar 0.04s 2.75s forwards; }
+    .q1-c7  { animation: typeChar 0.04s 2.80s forwards; }
+    .q1-c8  { animation: typeChar 0.04s 2.85s forwards; }
+    .q1-c9  { animation: typeChar 0.04s 2.90s forwards; }
+    .q1-c10 { animation: typeChar 0.04s 2.95s forwards; }
+    .q1-c11 { animation: typeChar 0.04s 3.00s forwards; }
+    .q1-c12 { animation: typeChar 0.04s 3.05s forwards; }
+    .q1-c13 { animation: typeChar 0.04s 3.10s forwards; }
+    .q1-c14 { animation: typeChar 0.04s 3.15s forwards; }
+    .q1-c15 { animation: typeChar 0.04s 3.20s forwards; }
+    .q1-c16 { animation: typeChar 0.04s 3.25s forwards; }
+    .q1-c17 { animation: typeChar 0.04s 3.30s forwards; }
+    .q1-c18 { animation: typeChar 0.04s 3.35s forwards; }
+    .q1-c19 { animation: typeChar 0.04s 3.40s forwards; }
+    .q1-c20 { animation: typeChar 0.04s 3.45s forwards; }
+
+    /* Response 1 appear */
+    .phase-label1  { opacity: 0; animation: fadeIn 0.3s ease-out 3.8s forwards; }
+    .phase-resp1   { opacity: 0; animation: fadeIn 0.6s ease-out 4.1s forwards; }
+
+    /* Q2 section */
+    .phase-input2  { opacity: 0; animation: fadeIn 0.4s ease-out 5.5s forwards; }
+
+    /* Q2 typing: "list the trauma's he had!" — starts at 6.0s */
+    .q2-c1  { animation: typeChar 0.04s 6.0s forwards; }
+    .q2-c2  { animation: typeChar 0.04s 6.05s forwards; }
+    .q2-c3  { animation: typeChar 0.04s 6.10s forwards; }
+    .q2-c4  { animation: typeChar 0.04s 6.15s forwards; }
+    .q2-c5  { animation: typeChar 0.04s 6.20s forwards; }
+    .q2-c6  { animation: typeChar 0.04s 6.25s forwards; }
+    .q2-c7  { animation: typeChar 0.04s 6.30s forwards; }
+    .q2-c8  { animation: typeChar 0.04s 6.35s forwards; }
+    .q2-c9  { animation: typeChar 0.04s 6.40s forwards; }
+    .q2-c10 { animation: typeChar 0.04s 6.45s forwards; }
+    .q2-c11 { animation: typeChar 0.04s 6.50s forwards; }
+    .q2-c12 { animation: typeChar 0.04s 6.55s forwards; }
+    .q2-c13 { animation: typeChar 0.04s 6.60s forwards; }
+    .q2-c14 { animation: typeChar 0.04s 6.65s forwards; }
+    .q2-c15 { animation: typeChar 0.04s 6.70s forwards; }
+    .q2-c16 { animation: typeChar 0.04s 6.75s forwards; }
+    .q2-c17 { animation: typeChar 0.04s 6.80s forwards; }
+    .q2-c18 { animation: typeChar 0.04s 6.85s forwards; }
+    .q2-c19 { animation: typeChar 0.04s 6.90s forwards; }
+    .q2-c20 { animation: typeChar 0.04s 6.95s forwards; }
+    .q2-c21 { animation: typeChar 0.04s 7.00s forwards; }
+    .q2-c22 { animation: typeChar 0.04s 7.05s forwards; }
+    .q2-c23 { animation: typeChar 0.04s 7.10s forwards; }
+    .q2-c24 { animation: typeChar 0.04s 7.15s forwards; }
+    .q2-c25 { animation: typeChar 0.04s 7.20s forwards; }
+    .q2-c26 { animation: typeChar 0.04s 7.25s forwards; }
+
+    /* Response 2 appear */
+    .phase-label2  { opacity: 0; animation: fadeIn 0.3s ease-out 7.6s forwards; }
+    .phase-resp2   { opacity: 0; animation: fadeIn 0.6s ease-out 7.9s forwards; }
+    .phase-resp2b  { opacity: 0; animation: fadeIn 0.5s ease-out 8.3s forwards; }
+    .phase-resp2c  { opacity: 0; animation: fadeIn 0.5s ease-out 8.6s forwards; }
+    .phase-resp2d  { opacity: 0; animation: fadeIn 0.5s ease-out 8.9s forwards; }
+    .phase-resp2e  { opacity: 0; animation: fadeIn 0.5s ease-out 9.2s forwards; }
+    .phase-resp2f  { opacity: 0; animation: fadeIn 0.5s ease-out 9.5s forwards; }
+
+    /* Footer prompt */
+    .phase-footer  { opacity: 0; animation: fadeIn 0.5s ease-out 10.0s forwards; }
+  </style>
+
+  <!-- Terminal window -->
+  <g filter="url(#windowShadow)">
+    <!-- Window chrome -->
+    <rect x="20" y="16" width="880" height="648" rx="12" fill="#1a1a22"/>
+    <rect x="20" y="16" width="880" height="40" rx="12" fill="#252530"/>
+    <rect x="20" y="44" width="880" height="12" fill="#252530"/>
+
+    <!-- Traffic lights -->
+    <circle cx="48" cy="36" r="7" fill="#ff5f57"/>
+    <circle cx="72" cy="36" r="7" fill="#ffbd2e"/>
+    <circle cx="96" cy="36" r="7" fill="#28c840"/>
+
+    <!-- Title bar -->
+    <text x="460" y="40" text-anchor="middle" fill="#8a8a95" font-size="12.5" font-weight="500">Unmasked</text>
+
+    <!-- python3 tab pill -->
+    <rect x="770" y="24" width="80" height="24" rx="6" fill="#333340"/>
+    <circle cx="783" cy="36" r="4" fill="#b967ff"/>
+    <text x="810" y="40" text-anchor="middle" fill="#c8c8d0" font-size="10">python3</text>
+  </g>
+
+  <!-- Terminal content area -->
+  <g>
+    <!-- ============ BANNER ============ -->
+    <g class="phase-banner">
+      <!-- ASCII art "UNMASKED" in purple - simplified block letters -->
+      <text x="460" y="108" text-anchor="middle" fill="#b967ff" font-size="38" font-weight="900" letter-spacing="6" filter="url(#textGlow)">UNMASKED</text>
+      <text x="460" y="132" text-anchor="middle" fill="#6b6b70" font-size="12">Know the character. Unmask their mind.</text>
+    </g>
+
+    <!-- ============ CHARACTER PROMPT ============ -->
+    <g class="phase-prompt">
+      <text x="60" y="170" fill="#8a8a95" font-size="12">Enter a character name to begin.</text>
+      <text x="60" y="188" fill="#555560" font-size="11">Try: Batman  ·  Walter White  ·  Johan Liebert</text>
+
+      <text x="60" y="218" fill="#e8e8ea" font-size="13" font-weight="700">character &gt;</text>
+      <text x="170" y="218" fill="#b967ff" font-size="13" font-weight="700">Batman</text>
+    </g>
+
+    <!-- Divider 1 -->
+    <g class="phase-input1">
+      <line x1="55" y1="238" x2="865" y2="238" stroke="#2a2a35" stroke-width="1"/>
+    </g>
+
+    <!-- ============ QUESTION 1 ============ -->
+    <g class="phase-input1">
+      <text x="72" y="264" fill="#28c840" font-size="13">›</text>
+
+      <!-- Typed text: "what drives batman?" -->
+      <text y="264" fill="#e8e8ea" font-size="13">
+        <tspan x="90" class="type-char q1-c1">w</tspan><tspan class="type-char q1-c2">h</tspan><tspan class="type-char q1-c3">a</tspan><tspan class="type-char q1-c4">t</tspan><tspan class="type-char q1-c5"> </tspan><tspan class="type-char q1-c6">d</tspan><tspan class="type-char q1-c7">r</tspan><tspan class="type-char q1-c8">i</tspan><tspan class="type-char q1-c9">v</tspan><tspan class="type-char q1-c10">e</tspan><tspan class="type-char q1-c11">s</tspan><tspan class="type-char q1-c12"> </tspan><tspan class="type-char q1-c13">b</tspan><tspan class="type-char q1-c14">a</tspan><tspan class="type-char q1-c15">t</tspan><tspan class="type-char q1-c16">m</tspan><tspan class="type-char q1-c17">a</tspan><tspan class="type-char q1-c18">n</tspan><tspan class="type-char q1-c19">?</tspan>
+      </text>
+    </g>
+
+    <!-- Response 1 label -->
+    <g class="phase-label1">
+      <text x="72" y="290" fill="#b967ff" font-size="13">◆</text>
+      <text x="90" y="290" fill="#b967ff" font-size="13" font-weight="700">UNMASKED</text>
+    </g>
+
+    <!-- Response 1 body -->
+    <g class="phase-resp1">
+      <text x="60" y="318" fill="#c8c8d0" font-size="12">
+        <tspan x="60">Batman's primary drive stems from his traumatic childhood experience</tspan>
+        <tspan x="60" dy="18">of witnessing his parents' murder. This event triggers a deep-seated</tspan>
+        <tspan x="60" dy="18">need for justice and a desire for vengeance, tempered by a strong</tspan>
+        <tspan x="60" dy="18">sense of morality.</tspan>
+      </text>
+    </g>
+
+    <!-- Divider 2 -->
+    <g class="phase-input2">
+      <line x1="55" y1="395" x2="865" y2="395" stroke="#2a2a35" stroke-width="1"/>
+    </g>
+
+    <!-- ============ QUESTION 2 ============ -->
+    <g class="phase-input2">
+      <text x="72" y="421" fill="#28c840" font-size="13">›</text>
+
+      <!-- Typed text: "list the trauma's he had!" -->
+      <text y="421" fill="#e8e8ea" font-size="13">
+        <tspan x="90" class="type-char q2-c1">l</tspan><tspan class="type-char q2-c2">i</tspan><tspan class="type-char q2-c3">s</tspan><tspan class="type-char q2-c4">t</tspan><tspan class="type-char q2-c5"> </tspan><tspan class="type-char q2-c6">t</tspan><tspan class="type-char q2-c7">h</tspan><tspan class="type-char q2-c8">e</tspan><tspan class="type-char q2-c9"> </tspan><tspan class="type-char q2-c10">t</tspan><tspan class="type-char q2-c11">r</tspan><tspan class="type-char q2-c12">a</tspan><tspan class="type-char q2-c13">u</tspan><tspan class="type-char q2-c14">m</tspan><tspan class="type-char q2-c15">a</tspan><tspan class="type-char q2-c16">'</tspan><tspan class="type-char q2-c17">s</tspan><tspan class="type-char q2-c18"> </tspan><tspan class="type-char q2-c19">h</tspan><tspan class="type-char q2-c20">e</tspan><tspan class="type-char q2-c21"> </tspan><tspan class="type-char q2-c22">h</tspan><tspan class="type-char q2-c23">a</tspan><tspan class="type-char q2-c24">d</tspan><tspan class="type-char q2-c25">!</tspan>
+      </text>
+    </g>
+
+    <!-- Response 2 label -->
+    <g class="phase-label2">
+      <text x="72" y="447" fill="#b967ff" font-size="13">◆</text>
+      <text x="90" y="447" fill="#b967ff" font-size="13" font-weight="700">UNMASKED</text>
+    </g>
+
+    <!-- Response 2 body - staggered lines -->
+    <g class="phase-resp2">
+      <text x="60" y="475" fill="#c8c8d0" font-size="12">Bruce Wayne experienced:</text>
+    </g>
+
+    <g class="phase-resp2b">
+      <text x="72" y="502" fill="#28c840" font-size="12" font-weight="700">1</text>
+      <text x="92" y="502" fill="#c8c8d0" font-size="12">Witnessing his parents' murder at a young age.</text>
+    </g>
+
+    <g class="phase-resp2c">
+      <text x="72" y="524" fill="#28c840" font-size="12" font-weight="700">2</text>
+      <text x="92" y="524" fill="#c8c8d0" font-size="12">Being left alone after his mother's death.</text>
+    </g>
+
+    <g class="phase-resp2d">
+      <text x="72" y="546" fill="#28c840" font-size="12" font-weight="700">3</text>
+      <text x="92" y="546" fill="#c8c8d0" font-size="12">Developing a fear of bats after falling into a well.</text>
+    </g>
+
+    <g class="phase-resp2e">
+      <text x="72" y="568" fill="#28c840" font-size="12" font-weight="700">4</text>
+      <text x="92" y="568" fill="#c8c8d0" font-size="12">The loss of his parents, leading to feelings of abandonment.</text>
+    </g>
+
+    <g class="phase-resp2f">
+      <text x="72" y="590" fill="#28c840" font-size="12" font-weight="700">5</text>
+      <text x="92" y="590" fill="#c8c8d0" font-size="12">The failure to avenge his parents' death when Joe Chill was killed before he could.</text>
+    </g>
+
+    <!-- ============ FOOTER ============ -->
+    <g class="phase-footer">
+      <line x1="55" y1="612" x2="865" y2="612" stroke="#2a2a35" stroke-width="1"/>
+      <text y="636" fill="#555560" font-size="11">
+        <tspan x="60">Ask anything.</tspan>
+        <tspan fill="#28c840" font-weight="600"> help</tspan>
+        <tspan fill="#555560"> for commands  ·  </tspan>
+        <tspan fill="#28c840" font-weight="600">q</tspan>
+        <tspan fill="#555560"> to quit.</tspan>
+      </text>
+
+      <!-- Blinking cursor at the end -->
+      <use href="#cursor" x="60" y="644"/>
+    </g>
+  </g>
+</svg>
